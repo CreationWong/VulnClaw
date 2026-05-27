@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import json
 import sys
 from typing import Any
@@ -113,7 +114,8 @@ async def _call_with_persistent_retries(
 
     while True:
         try:
-            response = await loop.run_in_executor(None, request_fn)
+            maybe_response = loop.run_in_executor(None, request_fn)
+            response = await maybe_response if inspect.isawaitable(maybe_response) else maybe_response
             if response is not None and getattr(response, "choices", None):
                 return response, retry_attempts
 
